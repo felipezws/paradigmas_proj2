@@ -5,18 +5,22 @@ main(Table) :-
   huffman(Sorted, Tree),
   table(Tree, Table).
 
-table(Tree, Table) :-
-  table(Tree, [], Table).
 
-table(nil, _, []).
-
-table(node(nil, [A, _], nil), [], [A, []]).
+table(node(nil, [A, _], nil), [[A, []]]).
   
 table(N, T) :-
   node(L, _, R) = N,
   table(L, TL),
   table(R, TR),
-  T is [[TL]|TR].
+  updateTable(TL, 0, UL),
+  updateTable(TR, 1, UR),
+  append(UL, UR, T).
+
+
+updateTable([], _, []).
+
+updateTable([[A,P]|Es], C, [[A, [C|P]]|X]) :-
+  updateTable(Es, C, X).
 
 
 huffman([X|[]], X).
