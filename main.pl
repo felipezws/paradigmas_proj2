@@ -1,23 +1,54 @@
-main(Sorted) :- 
+main(Table) :- 
   readFile('in', Chars),
   freq(Chars, Freqs),
-  isort(Freqs, Sorted).
+  isort(Freqs, Sorted),
+  huffman(Sorted, Tree),
+  table(Tree, Table).
 
-isort(L, R) :-
-  isort(L, [],R)
+table(Tree, Table) :-
+  table(Tree, [], Table).
+
+table(nil, _, []).
+
+table(node(nil, [A, _], nil), [], [A, []]).
   
+table(N, T) :-
+  node(L, _, R) = N,
+  table(L, TL),
+  table(R, TR),
+  T is [[TL]|TR].
 
-isort([], _, L).
 
-isort([F|Fs], ).
+huffman([X|[]], X).
 
-getmenor(L, R):-
+huffman([N1, N2|L], Tree) :-
+  node(_, [_,X], _) = N1,
+  node(_, [_,Y], _) = N2,
+  Freq is X + Y,
+  insert(node(N1, [nil, Freq], N2), L, R),
+  huffman(R, Tree).
 
-freq([], []).
+isort([], []).
 
-freq([C|[]], [[C, 1]]).
+isort([E|Es], R) :-
+  isort(Es, X),
+  insert(E, X, R).
+  
+insert(X, [], [X]).
 
-freq([C|Cs], [[C, 1]|X]) :-
+insert(X, [N|Ns], [X,N|Ns]) :-
+  node(_,[_, Freq1],_) = X,
+  node(_,[_, Freq2],_) = N,
+  Freq1 < Freq2.
+
+insert(X, [N|Ns], [N|R]) :-
+  insert(X, Ns, R).
+
+freq([_], []).
+
+freq([C|[]], [node(nil, [C, 1], nil)]).
+
+freq([C|Cs], [node(nil, [C, 1], nil)|X]) :-
   freq(Cs, X),
   not(membro(C, X)).
 
@@ -27,17 +58,17 @@ freq([C|Cs], X) :-
   Freq2 is Freq + 1,
   updatefreq(C, Freq2, R, X).
 
-membro(E, [[E,_]|_]).
+membro(E, [node(nil, [E,_], nil)|_]).
 
 membro(E, [_|X]) :-
   membro(E, X).
 
-getfreq(C, [[C, X]|_], X).
+getfreq(C, [node(nil,[C, X],nil)|_], X).
 
 getfreq(C, [_|Xs], X) :-
   getfreq(C, Xs, X).
 
-updatefreq(C, Freq, [[C, _]|X], [[C, Freq]|X]).
+updatefreq(C, Freq, [node(nil, [C, _], nil)|X], [node(nil,[C, Freq],nil)|X]).
 
 updatefreq(C, Freq, [E|Es], [E|X]) :-
   updatefreq(C, Freq, Es, X).
